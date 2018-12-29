@@ -8,7 +8,7 @@ defmodule Rill.MessageStore.Ecto.Postgres.Database do
 
   @behaviour Rill.MessageStore.Database
 
-  use Rill.Kernel
+  use Rill.MessageStore.Ecto.Postgres.Kernel
   alias Rill.Session
   alias Rill.MessageStore.StreamName
   alias Rill.MessageStore.MessageData.Write
@@ -18,6 +18,8 @@ defmodule Rill.MessageStore.Ecto.Postgres.Database do
   alias Rill.Identifier.UUID.Random, as: Identifier
   alias Rill.MessageStore.ExpectedVersion
   alias Rill.Messaging.Message.Transform
+
+  @scribble tag: :message_store
 
   @type row :: list()
   @type row_map :: %{
@@ -45,9 +47,9 @@ defmodule Rill.MessageStore.Ecto.Postgres.Database do
   @impl Rill.MessageStore.Database
   def get(%Session{} = session, stream_name, opts \\ [])
       when is_binary(stream_name) and is_list(opts) do
-    Log.trace(fn ->
-      {"Getting (Stream Name: #{stream_name})", tags: [:get]}
-    end)
+    Log.trace tag: :get do
+      "Getting (Stream Name: #{stream_name})"
+    end
 
     repo = Session.get_config(session, :repo)
     condition = constrain_condition(opts[:condition])
@@ -62,19 +64,17 @@ defmodule Rill.MessageStore.Ecto.Postgres.Database do
       |> Map.fetch!(:rows)
       |> convert()
 
-    Log.debug(fn ->
+    Log.debug tag: :get do
       count = length(messages)
 
-      {"Finished Getting Messages (Stream Name: #{stream_name}, Count: #{count}, Position: #{
-         inspect(position)
-       }, Batch Size: #{inspect(batch_size)}, Condition: #{
-         condition || "(none)"
-       })", tags: [:get]}
-    end)
+      "Finished Getting Messages (Stream Name: #{stream_name}, Count: #{count}, Position: #{
+        inspect(position)
+      }, Batch Size: #{inspect(batch_size)}, Condition: #{condition || "(none)"})"
+    end
 
-    Log.info(fn ->
-      {"Get Completed (Stream Name: #{stream_name})", tags: [:get]}
-    end)
+    Log.info tag: :get do
+      "Get Completed (Stream Name: #{stream_name})"
+    end
 
     messages
   end
@@ -82,9 +82,9 @@ defmodule Rill.MessageStore.Ecto.Postgres.Database do
   @impl Rill.MessageStore.Database
   def get_last(%Session{} = session, stream_name)
       when is_binary(stream_name) do
-    Log.trace(fn ->
-      {"Getting Last (Stream Name: #{stream_name})", tags: [:get, :get_last]}
-    end)
+    Log.trace tags: [:get, :get_last] do
+      "Getting Last (Stream Name: #{stream_name})"
+    end
 
     repo = Session.get_config(session, :repo)
     sql = sql_get_last(stream_name)
@@ -97,14 +97,13 @@ defmodule Rill.MessageStore.Ecto.Postgres.Database do
       |> List.last()
       |> convert_row()
 
-    Log.debug(fn ->
-      {inspect(last_message, pretty: true), tags: [:get, :get_last, :data]}
-    end)
+    Log.debug tags: [:get, :get_last, :data] do
+      inspect(last_message, pretty: true)
+    end
 
-    Log.info(fn ->
-      {"Get Last Completed (Stream Name: #{stream_name})",
-       tags: [:get, :get_last]}
-    end)
+    Log.info tags: [:get, :get_last] do
+      "Get Last Completed (Stream Name: #{stream_name})"
+    end
 
     last_message
   end
@@ -120,13 +119,15 @@ defmodule Rill.MessageStore.Ecto.Postgres.Database do
       |> Keyword.get(:expected_version)
       |> ExpectedVersion.canonize()
 
-    Log.trace(fn ->
-      {"Putting (Stream Name: #{stream_name}, Expected Version: #{
-         inspect(expected_version)
-       })", tags: [:put]}
-    end)
+    Log.trace tag: :put do
+      "Putting (Stream Name: #{stream_name}, Expected Version: #{
+        inspect(expected_version)
+      })"
+    end
 
-    Log.debug(fn -> {inspect(msg, pretty: true), tags: [:put, :data]} end)
+    Log.debug tags: [:put, :data] do
+      inspect(msg, pretty: true)
+    end
 
     %{id: id, type: type, data: data, metadata: metadata} = msg
     id = id || identifier_get.()
@@ -141,10 +142,9 @@ defmodule Rill.MessageStore.Ecto.Postgres.Database do
       |> Map.fetch!(:rows)
       |> convert_position()
 
-    Log.info(fn ->
-      {"Put Completed (Stream Name: #{stream_name}, Position: #{position})",
-       tags: [:put]}
-    end)
+    Log.info tag: :put do
+      "Put Completed (Stream Name: #{stream_name}, Position: #{position})"
+    end
 
     position
   end

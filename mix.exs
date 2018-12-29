@@ -9,6 +9,7 @@ defmodule Rill.MessageStore.Ecto.Postgres.MixProject do
       app: :rill_ecto_postgres,
       version: @version,
       elixir: "~> 1.7",
+      package: package(),
       deps: deps(),
       aliases: aliases(),
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -25,7 +26,12 @@ defmodule Rill.MessageStore.Ecto.Postgres.MixProject do
           :race_conditions
         ],
         paths: ["_build/#{Mix.env()}/lib/rill_ecto_postgres/consolidated"]
-      ]
+      ],
+      # Docs
+      name: "Rill.MessageStore.Ecto.Postgres",
+      source_url: "https://github.com/rill-project/rill_ecto_postgres",
+      homepage_url: "https://github.com/rill-project/rill_ecto_postgres",
+      docs: docs()
     ]
   end
 
@@ -36,6 +42,35 @@ defmodule Rill.MessageStore.Ecto.Postgres.MixProject do
     ]
   end
 
+  def package do
+    [
+      maintainers: ["Francesco Belladonna"],
+      description:
+        "Postgres adapter for Rill, event-sourced microservices framework",
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/rill-project/rill_ecto_postgres"},
+      files: [
+        ".formatter.exs",
+        "mix.exs",
+        "README.md",
+        "VERSION",
+        "test",
+        "lib",
+        "config/config.exs",
+        "config/environment/dev.exs",
+        "config/environment/prod.exs",
+        "config/environment/test.exs"
+      ]
+    ]
+  end
+
+  def docs do
+    [
+      main: "README.md",
+      extras: ["README.md": [filename: "README.md", title: "Rill"]]
+    ]
+  end
+
   # Run "mix help deps" to learn about dependencies.
   def deps do
     [
@@ -43,9 +78,8 @@ defmodule Rill.MessageStore.Ecto.Postgres.MixProject do
       {:ecto, ">= 3.0.0"},
       {:ecto_sql, ">= 3.0.0"},
       {:postgrex, ">= 0.14.0"},
-      {:jason, ">= 1.1.0"},
-      {:ex2ms, ">= 1.5.0"},
-      {:recase, ">= 0.3.0"}
+      {:rill, ">= 0.9.0"},
+      {:scribble, ">= 0.2.0"}
     ]
   end
 
