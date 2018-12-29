@@ -75,6 +75,7 @@ defmodule Rill.MessageStore.Ecto.Postgres.MixProject do
   def deps do
     [
       {:dialyxir, ">= 1.0.0-rc.3", only: [:dev], runtime: false},
+      {:ex_doc, ">= 0.19.2", only: [:dev]},
       {:ecto, ">= 3.0.0"},
       {:ecto_sql, ">= 3.0.0"},
       {:postgrex, ">= 0.14.0"},
